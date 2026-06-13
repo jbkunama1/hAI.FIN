@@ -1,0 +1,35 @@
+# hAI.FIN – Portainer-Stack
+# Einfach kopieren und in Portainer Stack Editor einfuegen
+
+version: "3.8"
+
+services:
+  hai-fin:
+    build: .
+    image: hai-fin:latest
+    container_name: hAI_FIN
+    restart: unless-stopped
+    environment:
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL_NAME=${MODEL_NAME}
+      - ETORO_PUBLIC_KEY=${ETORO_PUBLIC_KEY}
+      - ETORO_USER_KEY=${ETORO_USER_KEY}
+      - ETORO_BASE_URL=${ETORO_BASE_URL}
+      - ETORO_AGENT_PORTFOLIO_ID=${ETORO_AGENT_PORTFOLIO_ID}
+      - MAX_TRADES_PER_DAY=${MAX_TRADES_PER_DAY}
+      - MAX_POSITION_PERCENT=${MAX_POSITION_PERCENT}
+      - ALLOWED_ASSETS=${ALLOWED_ASSETS}
+      - ENABLE_SHORT=${ENABLE_SHORT}
+      - ENABLE_LEVERAGE=${ENABLE_LEVERAGE}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DRY_RUN=${DRY_RUN}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - hai-fin-net
+
+networks:
+  hai-fin-net:
+    driver: bridge

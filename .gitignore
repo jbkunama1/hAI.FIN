@@ -1,0 +1,17 @@
+# Secrets – NIEMALS einchecken!
+.env
+*.key
+*.pem
+
+# Docker
+data/
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
