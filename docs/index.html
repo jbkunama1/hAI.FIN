@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hAI.FIN – Autonomer ETF-Trading-Agent</title>
+  <meta name="description" content="Self-hosted, regelbasierter ETF-Trading-Agent mit Composite Signal Score, Telegram-Alerts und Streamlit-Dashboard.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0d1117;
+      --surface:    #161b22;
+      --surface-2:  #1c2128;
+      --border:     #30363d;
+      --text:       #e6edf3;
+      --text-muted: #8b949e;
+      --green:      #3fb950;
+      --green-dim:  #1a3a1f;
+      --red:        #f85149;
+      --yellow:     #d29922;
+      --blue:       #58a6ff;
+      --teal:       #39d0c8;
+      --font-body:  'Inter', system-ui, sans-serif;
+      --font-mono:  'JetBrains Mono', monospace;
+      --radius:     8px;
+      --radius-lg:  12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img { display: block; max-width: 100%; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-weight: 600; font-size: 1.1rem;
+      color: var(--teal);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: var(--text-muted); font-size: .875rem; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-cta {
+      background: var(--green); color: #0d1117 !important;
+      padding: 6px 14px; border-radius: 6px; font-weight: 600;
+      font-size: .8rem; transition: opacity .15s;
+    }
+    .nav-cta:hover { opacity: .85; text-decoration: none !important; }
+
+    /* HERO */
+    .hero {
+      max-width: 860px; margin: 0 auto;
+      padding: 6rem 2rem 4rem;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 999px;
+      padding: 4px 14px; font-size: .8rem;
+      font-family: var(--font-mono);
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 700; line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 span { color: var(--teal); }
+    .hero p {
+      font-size: 1.15rem; color: var(--text-muted);
+      max-width: 600px; margin: 0 auto 2rem;
+    }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: var(--radius);
+      font-weight: 600; font-size: .9rem;
+      transition: opacity .15s, transform .15s;
+      cursor: pointer;
+    }
+    .btn:hover { opacity: .85; transform: translateY(-1px); text-decoration: none; }
+    .btn-primary { background: var(--green); color: #0d1117; }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    /* BADGES */
+    .badges { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; margin: 2.5rem 0 0; }
+    .badges img { display: inline; }
+
+    /* SECTIONS */
+    section { max-width: 960px; margin: 0 auto; padding: 4rem 2rem; }
+    section + section { border-top: 1px solid var(--border); }
+    h2 {
+      font-size: 1.6rem; font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+
+    /* FEATURE GRID */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+    }
+    .feature-card .icon { font-size: 1.5rem; margin-bottom: .5rem; }
+    .feature-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: .35rem; }
+    .feature-card p { font-size: .875rem; color: var(--text-muted); }
+
+    /* SCORE TABLE */
+    .score-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .score-table table { width: 100%; border-collapse: collapse; }
+    .score-table th {
+      background: var(--surface-2);
+      text-align: left; padding: .75rem 1rem;
+      font-size: .8rem; text-transform: uppercase;
+      letter-spacing: .05em; color: var(--text-muted);
+    }
+    .score-table td { padding: .7rem 1rem; font-size: .9rem; }
+    .score-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+    .score-table tr:hover td { background: var(--surface-2); }
+    .pos { color: var(--green); font-family: var(--font-mono); font-weight: 600; }
+    .neg { color: var(--red);   font-family: var(--font-mono); font-weight: 600; }
+
+    /* ACTION PILLS */
+    .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    .pill {
+      display: flex; align-items: center; gap: .4rem;
+      padding: .5rem 1rem; border-radius: 999px;
+      font-family: var(--font-mono); font-size: .85rem; font-weight: 600;
+    }
+    .pill-buy    { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+    .pill-hold   { background: #2a2000; color: var(--yellow); border: 1px solid var(--yellow); }
+    .pill-skip   { background: #2a0f0f; color: var(--red); border: 1px solid var(--red); }
+    .pill-reduce { background: #2a0f0f; color: var(--red); border: 1px solid var(--red); }
+
+    /* CODE BLOCK */
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: .85rem;
+      line-height: 1.7;
+    }
+    code { font-family: var(--font-mono); font-size: .875em; color: var(--teal); }
+    pre code { color: var(--text); }
+    .comment { color: var(--text-muted); }
+    .kw  { color: #ff7b72; }
+    .str { color: #a5d6ff; }
+    .num { color: var(--green); }
+
+    /* DATA SOURCES */
+    .sources {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: .75rem;
+    }
+    .source-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex; flex-direction: column; gap: .3rem;
+    }
+    .source-card .name { font-weight: 600; font-size: .95rem; }
+    .source-card .desc { font-size: .8rem; color: var(--text-muted); }
+    .badge-free  { display: inline-block; background: var(--green-dim); color: var(--green); border-radius: 4px; padding: 1px 7px; font-size: .75rem; }
+    .badge-key   { display: inline-block; background: #1a1a2e; color: var(--blue);  border-radius: 4px; padding: 1px 7px; font-size: .75rem; }
+
+    /* STACK */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: .75rem;
+    }
+    .stack-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .75rem 1rem;
+      font-size: .875rem;
+      display: flex; align-items: center; gap: .6rem;
+    }
+
+    /* DISCLAIMER */
+    .disclaimer {
+      background: #1a0a00;
+      border: 1px solid var(--yellow);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      font-size: .875rem;
+      color: #d4b87a;
+      line-height: 1.7;
+    }
+    .disclaimer strong { color: var(--yellow); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--text-muted);
+      font-size: .875rem;
+    }
+    footer a { color: var(--text-muted); }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero { padding: 4rem 1.25rem 2.5rem; }
+      section { padding: 3rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+      <polyline points="16 7 22 7 22 13"/>
+    </svg>
+    hAI.FIN
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#signale">Signale</a>
+    <a href="#quickstart">Quickstart</a>
+    <a href="#daten">Datenquellen</a>
+    <a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener" class="nav-cta">★ GitHub</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">⚡ v0.1.0 – Alpha</div>
+  <h1>Autonomer<br><span>ETF-Trading-Agent</span></h1>
+  <p>Self-hosted · regelbasiert · konservativ · Telegram-Alerts · Streamlit-Dashboard · Docker-ready</p>
+  <div class="hero-buttons">
+    <a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <a href="https://github.com/jbkunama1/hAI.FIN/blob/main/README.md" target="_blank" rel="noopener" class="btn btn-secondary">
+      📖 Dokumentation
+    </a>
+  </div>
+  <div class="badges">
+    <img src="https://img.shields.io/badge/Version-0.1.0-blue.svg" alt="Version">
+    <img src="https://img.shields.io/badge/Python-3.12-blue.svg" alt="Python">
+    <img src="https://img.shields.io/badge/Docker-Ready-blue.svg" alt="Docker">
+    <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT">
+    <img src="https://img.shields.io/badge/Default-DRY__RUN-orange.svg" alt="DRY RUN">
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <h2>✨ Features</h2>
+  <div class="features">
+    <div class="feature-card"><div class="icon">🧠</div><h3>Composite Signal Score</h3><p>MA200, MA50, RSI, Fear&Greed, VIX, Zinskurve und Event-Kalender in einem Score.</p></div>
+    <div class="feature-card"><div class="icon">📊</div><h3>Live-Marktdaten</h3><p>CNN Fear&Greed, yfinance, FRED – größtenteils ohne API-Key sofort nutzbar.</p></div>
+    <div class="feature-card"><div class="icon">🛡️</div><h3>Harte Guardrails</h3><p>Max. Trades/Tag, Positionslimit, Cash-Reserve, Asset-Whitelist – keine Ausnahmen.</p></div>
+    <div class="feature-card"><div class="icon">📱</div><h3>Telegram-Notifier</h3><p>Morgen-Briefing, Trade-Alerts, VIX-Notbremse und Fehlermeldungen in Echtzeit.</p></div>
+    <div class="feature-card"><div class="icon">📈</div><h3>Streamlit-Dashboard</h3><p>Live-Signale, Portfolio-Simulation und Trade-Log auf Port 8501.</p></div>
+    <div class="feature-card"><div class="icon">⏰</div><h3>GitHub Actions Cron</h3><p>Automatischer Lauf Mo–Fr 09:45 ET mit Log-Archivierung als Artefakte.</p></div>
+  </div>
+</section>
+
+<!-- SIGNALE -->
+<section id="signale">
+  <h2>🎯 Composite Signal Score</h2>
+  <div class="score-table">
+    <table>
+      <thead><tr><th>Punkte</th><th>Indikator</th><th>Bedingung</th></tr></thead>
+      <tbody>
+        <tr><td class="pos">+2</td><td>MA200-Trend</td><td>Kurs &gt; MA200 (langfristiger Aufwärtstrend)</td></tr>
+        <tr><td class="pos">+1</td><td>Golden Cross</td><td>MA50 &gt; MA200</td></tr>
+        <tr><td class="pos">+1</td><td>RSI neutral</td><td>RSI zwischen 35–60</td></tr>
+        <tr><td class="pos">+1</td><td>Fear &amp; Greed</td><td>Score &lt; 45 (Markt hat Angst)</td></tr>
+        <tr><td class="neg">−1</td><td>Fear &amp; Greed</td><td>Score &gt; 75 (Extreme Gier)</td></tr>
+        <tr><td class="neg">−2</td><td>MA200-Trend</td><td>Kurs &lt; MA200 (Abwärtstrend)</td></tr>
+        <tr><td class="neg">−1</td><td>VIX</td><td>VIX &gt; 30 (hohe Marktangst)</td></tr>
+        <tr><td class="neg">−1</td><td>Zinskurve</td><td>T10Y2Y &lt; 0 (invertiert)</td></tr>
+        <tr><td class="neg">−1</td><td>Event-Risiko</td><td>FOMC / CPI / Earnings heute</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="actions">
+    <div class="pill pill-buy">✅ Score ≥ 3 → BUY</div>
+    <div class="pill pill-hold">🟡 Score 1–2 → HOLD</div>
+    <div class="pill pill-skip">⏭ Score ≤ 0 → SKIP</div>
+    <div class="pill pill-reduce">⚠️ Score ≤ −2 → REDUCE</div>
+  </div>
+</section>
+
+<!-- QUICKSTART -->
+<section id="quickstart">
+  <h2>🚀 Quickstart</h2>
+  <pre><span class="comment"># 1. Klonen & konfigurieren</span>
+git clone https://github.com/jbkunama1/hAI.FIN.git
+<span class="kw">cd</span> hAI.FIN && cp .env.example .env
+
+<span class="comment"># 2. Lokal testen</span>
+pip install -r requirements.txt
+python -m pytest tests/ -v
+<span class="kw">DRY_RUN</span>=<span class="str">true</span> python -m src.agent
+
+<span class="comment"># 3. Dashboard</span>
+bash dashboard/run.sh
+<span class="comment"># → http://localhost:8501</span>
+
+<span class="comment"># 4. Docker Compose</span>
+docker compose up -d
+<span class="comment"># Agent + Dashboard laufen als Services</span></pre>
+</section>
+
+<!-- DATENQUELLEN -->
+<section id="daten">
+  <h2>📡 Freie Datenquellen</h2>
+  <div class="sources">
+    <div class="source-card"><div class="name">CNN Fear &amp; Greed</div><div class="desc">Sentiment 0–100 aus 7 Teilindikatoren</div><span class="badge-free">kein Key</span></div>
+    <div class="source-card"><div class="name">yfinance</div><div class="desc">Kurse, MA200/50, RSI(14), Volumen</div><span class="badge-free">kein Key</span></div>
+    <div class="source-card"><div class="name">FRED (Fed)</div><div class="desc">VIX, Zinskurve, Leitzins, CPI</div><span class="badge-free">kein Key</span></div>
+    <div class="source-card"><div class="name">Finnhub</div><div class="desc">Earnings-Kalender, News-Sentiment</div><span class="badge-key">kostenloser Key</span></div>
+    <div class="source-card"><div class="name">Alpha Vantage</div><div class="desc">RSI, MACD, Fundamentaldaten</div><span class="badge-key">kostenloser Key</span></div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section>
+  <h2>🛠️ Tech-Stack</h2>
+  <div class="stack-grid">
+    <div class="stack-item">🐳 Docker / Portainer</div>
+    <div class="stack-item">🐍 Python 3.12</div>
+    <div class="stack-item">📈 Streamlit</div>
+    <div class="stack-item">🧹 pytest</div>
+    <div class="stack-item">📡 yfinance</div>
+    <div class="stack-item">🏦 FRED API</div>
+    <div class="stack-item">📱 Telegram</div>
+    <div class="stack-item">⏰ GitHub Actions</div>
+  </div>
+</section>
+
+<!-- DISCLAIMER -->
+<section>
+  <div class="disclaimer">
+    <strong>⚠️ Disclaimer:</strong> Trading birgt erhebliche Risiken. Du kannst dein eingesetztes Kapital vollständig verlieren. Dieses Projekt ist ein experimentelles Open-Source-Tool für Bildungs- und Forschungszwecke. Der Autor übernimmt keinerlei Haftung für Verluste oder Schäden. <strong>Never trade more than you can afford to lose.</strong>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>🤖 <strong>hAI.FIN</strong> v0.1.0 &nbsp;·&nbsp; <a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener">GitHub</a> &nbsp;·&nbsp; <a href="https://github.com/jbkunama1/hAI.FIN/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a></p>
+  <p style="margin-top:.5rem; font-size:.8rem;">Built with passion for self-hosted AI &amp; finance automation</p>
+</footer>
+
+</body>
+</html>

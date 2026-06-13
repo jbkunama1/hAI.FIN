@@ -1,110 +1,79 @@
 # 🤖 hAI.FIN
 
+![Version](https://img.shields.io/badge/Version-0.1.0-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
-![Portainer](https://img.shields.io/badge/Portainer-Stack-orange.svg)
-![9Router](https://img.shields.io/badge/9Router-Compatible-purple.svg)
-![eToro](https://img.shields.io/badge/eToro-Agent--Portfolio-red.svg)
+![Python](https://img.shields.io/badge/Python-3.12-blue.svg)
 ![Status](https://img.shields.io/badge/Status-Alpha-yellow.svg)
+![DRY RUN](https://img.shields.io/badge/Default-DRY__RUN-orange.svg)
 
-> **Ein minimalistischer, autonomer Trading-Agent für eToro Agent Portfolios.**  
-> Self-hosted, Docker-tauglich, mit 9Router als LLM-Backend.
+> **Autonomer, konservativer ETF-Trading-Agent für eToro Agent Portfolios.**  
+> Self-hosted · Docker/Portainer · Regelbasiert · Telegram-Alerts · Streamlit-Dashboard
+
+🔗 **[Live-Doku & Demo → jbkunama1.github.io/hAI.FIN](https://jbkunama1.github.io/hAI.FIN)**
 
 ---
 
-## 🎯 Features
+## ✨ Features
 
-- 🐳 **Docker-Ready** – Einfacher Portainer-Stack
-- 🧠 **9Router-Integration** – Nutzt deinen eigenen LLM-Router
-- 📈 **eToro Skill** – Offizieller API-Zugang via Agent Portfolio
-- 🛡️ **Harte Guardrails** – Max. Trades, Positionslimits, erlaubte Assets
-- 📝 **MIT-Lizenz** – Open Source, frei nutzbar
-- ⚡ **Schnellstart** – API-Keys eintragen, Container starten
+| Feature | Beschreibung |
+|---|---|
+| 🧠 **Composite Signal Score** | MA200, MA50, RSI, Fear&Greed, VIX, Zinskurve, Event-Kalender |
+| 📊 **Live-Marktdaten** | CNN Fear&Greed, yfinance, FRED – größtenteils ohne API-Key |
+| 🛡️ **Harte Guardrails** | Max. Trades/Tag, Positionslimit, Cash-Reserve, Asset-Whitelist |
+| 📱 **Telegram-Notifier** | Morgen-Briefing, Trade-Alerts, Fehler, VIX-Notbremse |
+| 📈 **Streamlit-Dashboard** | Live-Signale, Portfolio-Simulation, Trade-Log |
+| 🧪 **Unit-Tests** | 8 Tests für Signal-Logik (pytest) |
+| ⏰ **GitHub Actions** | Täglicher Cron Mo–Fr 09:45 ET, Logs als Artefakte |
+| 🐳 **Docker-Ready** | Agent + Dashboard als eigene Services |
 
 ---
 
 ## 🚀 Schnellstart
 
-### 1. Voraussetzungen
-
+### Voraussetzungen
 - Docker & Docker Compose (oder Portainer)
 - eToro Account mit **Agent Portfolio**
-- eToro API Keys (Public Key + User Key)
-- 9Router Instanz (oder OpenAI-kompatibler Endpoint)
+- Optional: Finnhub-Key (kostenlos), Telegram-Bot
 
-### 2. Repository klonen
+### 1. Klonen & konfigurieren
 
 ```bash
 git clone https://github.com/jbkunama1/hAI.FIN.git
 cd hAI.FIN
-```
-
-### 3. Umgebungsvariablen konfigurieren
-
-```bash
 cp .env.example .env
-nano .env
+joe .env   # oder nano/vim
 ```
 
-### 4. Starten
+### 2. Lokal testen (ohne Docker)
 
-**Mit Docker Compose:**
 ```bash
-docker-compose up -d
+pip install -r requirements.txt
+
+# Unit-Tests
+python -m pytest tests/ -v
+
+# Agent einmalig (DRY_RUN)
+DRY_RUN=true python -m src.agent
+
+# Dashboard starten
+bash dashboard/run.sh
+# → http://localhost:8501
 ```
 
-**Mit Portainer:**
+### 3. Docker Compose (empfohlen)
+
+```bash
+docker compose up -d
+# Agent läuft im Hintergrund
+# Dashboard → http://<server>:8501
+```
+
+### 4. Portainer-Stack
 1. Stack Editor öffnen
-2. Inhalt von `docker-compose.yml` einfügen
-3. Environment Variablen eintragen
-4. Deploy Stack
-
----
-
-## 🔧 Konfiguration
-
-| Variable | Beschreibung | Beispiel |
-|----------|-------------|----------|
-| `OPENAI_API_BASE` | 9Router Endpoint | `https://9router.dein-server.de/v1` |
-| `OPENAI_API_KEY` | API Key für Router | `your-9router-api-key-here` |
-| `MODEL_NAME` | LLM Modell | `gpt-4o-mini` |
-| `ETORO_PUBLIC_KEY` | eToro Public Key | `pk_live_...` |
-| `ETORO_USER_KEY` | eToro User Key | `uk_live_...` |
-| `ETORO_AGENT_PORTFOLIO_ID` | Agent Portfolio ID | `portfolio-123` |
-| `MAX_TRADES_PER_DAY` | Max. Trades/Tag | `3` |
-| `MAX_POSITION_PERCENT` | Max. Position/Trade | `10` |
-| `ALLOWED_ASSETS` | Erlaubte Assets | `QQQ,SPY,VTI` |
-| `DRY_RUN` | Testmodus ohne echte Orders | `true`/`false` |
-
----
-
-## 🛡️ Sicherheit & Guardrails
-
-**WICHTIG:** Dieser Agent kann mit echtem Geld handeln!
-
-- ✅ Nur innerhalb eines **eToro Agent Portfolios** betreiben
-- ✅ Portfolio-Kapital begrenzen (z.B. 200–500 $)
-- ✅ Zuerst `DRY_RUN=true` zum Testen aktivieren
-- ✅ Erlaubte Assets und Limits definieren
-- ✅ Keine Hebelprodukte, keine Shorts per Default
-- ✅ IP-Whitelisting für API Keys nutzen
-
----
-
-## 🏗️ Architektur
-
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   hAI.FIN   │────▶│   9Router   │────▶│    LLM      │
-│   Agent     │     │  (Dein Host)│     │ (GPT/Claude)│
-└─────────────┘     └─────────────┘     └─────────────┘
-       │
-       ▼
-┌────────────────┐
-│   eToro API    │
-│ Agent Portfolio│
-└────────────────┘
-```
+2. `docker-compose.yml` einfügen
+3. `.env`-Variablen eintragen
+4. **Deploy Stack**
 
 ---
 
@@ -112,27 +81,123 @@ docker-compose up -d
 
 ```
 hAI.FIN/
-├── 📄 docker-compose.yml      # Portainer-Stack
-├── 📄 Dockerfile              # Container-Definition
-├── 📄 .env.example            # Konfigurationsvorlage
-├── 📄 README.md               # Diese Datei
-├── 📄 LICENSE                 # MIT-Lizenz
+├── 📄 docker-compose.yml       # Agent + Dashboard Services
+├── 📄 Dockerfile               # Container-Definition
+├── 📄 requirements.txt         # Python-Abhängigkeiten
+├── 📄 .env.example             # Konfigurationsvorlage (alle Keys erklärt)
+├── 📁 src/
+│   ├── agent.py                 # Hauptschleife
+│   ├── data_fetcher.py          # CNN F&G, yfinance, FRED, Finnhub
+│   ├── signals.py               # Composite Score Berechnung
+│   ├── portfolio.py             # Portfolio-Simulation & Guardrails
+│   ├── logger.py                # JSON-Logging
+│   └── notifier.py              # Telegram-Alerts
+├── 📁 dashboard/
+│   └── app.py                   # Streamlit-UI
 ├── 📁 config/
-│   ├── system-prompt.md       # Agent-Verhalten
-│   └── trading-policy.json    # Harte Trading-Regeln
-└── 📁 scripts/
-    └── start.sh               # Container-Start
+│   ├── system-prompt.md         # Agent-Wissensbasis v2.0
+│   ├── trading-policy.json      # Regeln & Guardrails
+│   ├── market-signals.md        # Signalreferenz & Schwellenwerte
+│   ├── data-sources.md          # Freie Datenquellen & Scoring
+│   └── agent-knowledge.md       # ETF-Profile, Marktphasen
+├── 📁 tests/
+│   └── test_signals.py          # 8 Unit-Tests
+└── 📁 .github/workflows/
+    └── daily-run.yml            # Mo–Fr 09:45 ET Cron
 ```
+
+---
+
+## 🧠 Entscheidungslogik
+
+Der Agent berechnet vor jedem Trade einen **Composite Signal Score**:
+
+```
++2  Kurs > MA200          → Langfristiger Aufwärtstrend
++1  MA50 > MA200          → Golden Cross aktiv
++1  RSI 35–60             → Weder überkauft noch überverkauft
++1  Fear&Greed < 45       → Markt hat Angst (konträrer Kaufindikator)
+−1  Fear&Greed > 75       → Extreme Gier (Vorsicht)
+−2  Kurs < MA200          → Abwärtstrend
+−1  VIX > 30              → Hohe Marktangst
+−1  T10Y2Y < 0            → Invertierte Zinskurve (Rezessionssignal)
+−1  Earnings/FOMC/CPI     → Event-Risiko
+
+Score ≥ 3  →  BUY
+Score 1–2  →  HOLD
+Score ≤ 0  →  SKIP
+Score ≤ −2 →  REDUCE
+```
+
+---
+
+## 📡 Freie Datenquellen (kein Key nötig)
+
+| Quelle | Daten | Key |
+|---|---|---|
+| CNN Fear & Greed | Sentiment 0–100 | ❌ |
+| yfinance | Kurse, MA200/50, RSI | ❌ |
+| FRED (Fed) | VIX, Zinskurve, Leitzins | ❌ |
+| Finnhub | Earnings-Kalender, News | ✅ kostenlos |
+| Alpha Vantage | RSI, MACD, Fundamentals | ✅ kostenlos |
+
+---
+
+## 🔧 Konfiguration `.env`
+
+| Variable | Beschreibung | Standard |
+|---|---|---|
+| `DRY_RUN` | Testmodus (keine echten Orders) | `true` |
+| `ALLOWED_ASSETS` | Handelbare Assets | `SPY,QQQ,VTI` |
+| `MAX_TRADES_PER_DAY` | Limit pro Tag | `3` |
+| `MAX_POSITION_PCT` | Max. Positionsgröße | `0.10` |
+| `MIN_CASH_RESERVE_PCT` | Mindest-Cash-Reserve | `0.20` |
+| `ORDER_SIZE_PCT` | Ordergröße | `0.05` |
+| `VIX_EMERGENCY` | Notbremse VIX-Schwelle | `40` |
+| `FINNHUB_KEY` | Finnhub API Key | optional |
+| `TELEGRAM_BOT_TOKEN` | Telegram-Bot-Token | optional |
+| `TELEGRAM_CHAT_ID` | Telegram-Chat-ID | optional |
+
+Alle Variablen mit Erklärung in [`.env.example`](.env.example).
+
+---
+
+## 📱 Telegram einrichten
+
+```bash
+# 1. Bot erstellen
+# Telegram → @BotFather → /newbot → Token kopieren
+
+# 2. Chat-ID ermitteln
+curl https://api.telegram.org/bot<TOKEN>/getUpdates
+# → "chat":{"id": 12345678}
+
+# 3. In .env eintragen
+TELEGRAM_BOT_TOKEN=123456789:ABCdef...
+TELEGRAM_CHAT_ID=12345678
+```
+
+---
+
+## 🛡️ Guardrails & Sicherheit
+
+- ✅ Nur `ALLOWED_ASSETS` handelbar
+- ✅ `MAX_TRADES_PER_DAY` absolut
+- ✅ `MIN_CASH_RESERVE_PCT` immer einhalten
+- ✅ Kein Short, kein Hebel per Default
+- ✅ VIX ≥ 40 → automatischer Cash-Modus
+- ✅ Keine Orders außerhalb 09:30–16:00 ET
+- ✅ `DRY_RUN=true` als sicherer Standard
 
 ---
 
 ## ⚠️ Disclaimer
 
-> ⚠️ **Trading birgt erhebliche Risiken. Du kannst dein eingesetztes Kapital verlieren.**
+> **Trading birgt erhebliche Risiken. Du kannst dein eingesetztes Kapital vollständig verlieren.**
 >
-> Dieses Projekt ist ein experimentelles Tool für Bildungs- und Forschungszwecke.
-> Der Autor übernimmt keine Haftung für Verluste oder Schäden.
-> Nutze ausschließlich Geld, das du bereit bist zu verlieren.
+> Dieses Projekt ist ein experimentelles Open-Source-Tool für Bildungs- und Forschungszwecke.
+> Der Autor übernimmt keinerlei Haftung für Verluste oder Schäden jeglicher Art.
+> Nutze ausschließlich Kapital, dessen Verlust du dir leisten kannst.
 >
 > **Never trade more than you can afford to lose.**
 
@@ -141,19 +206,20 @@ hAI.FIN/
 ## 🤝 Mitmachen
 
 1. Fork erstellen
-2. Feature-Branch: `git checkout -b feature/NeuesFeature`
-3. Committen: `git commit -m 'feat: Neues Feature'`
-4. Pushen: `git push origin feature/NeuesFeature`
+2. Branch: `git checkout -b feature/MeinFeature`
+3. Commit: `git commit -m 'feat: Beschreibung'`
+4. Push: `git push origin feature/MeinFeature`
 5. Pull Request öffnen
 
 ---
 
 ## 📜 Lizenz
 
-Dieses Projekt steht unter der **MIT-Lizenz**. Siehe [LICENSE](LICENSE) für Details.
+[MIT](LICENSE) – Open Source, frei nutzbar.
 
 ---
 
 <p align="center">
-  🤖 Built with passion for self-hosted AI & finance automation
+  🤖 Built with passion for self-hosted AI &amp; finance automation<br>
+  <a href="https://jbkunama1.github.io/hAI.FIN">jbkunama1.github.io/hAI.FIN</a>
 </p>
