@@ -1,0 +1,47 @@
+name: hAI.FIN Daily Run
+
+on:
+  schedule:
+    # 09:45 ET = 13:45 UTC (nach Markteroeffnung, erste 15 Min vermeiden)
+    - cron: '45 13 * * 1-5'
+  workflow_dispatch:  # Manueller Trigger
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Abhaengigkeiten installieren
+        run: pip install -r requirements.txt
+
+      - name: Unit-Tests ausfuehren
+        run: python -m pytest tests/ -v
+
+      - name: Agent ausfuehren (DRY_RUN)
+        env:
+          DRY_RUN:          'true'
+          LOG_LEVEL:        'INFO'
+          ALLOWED_ASSETS:   'SPY,QQQ,VTI'
+          INITIAL_CASH:     '10000'
+          ORDER_SIZE_PCT:   '0.05'
+          MAX_TRADES_PER_DAY: '3'
+          MIN_CASH_RESERVE_PCT: '0.20'
+          MAX_POSITION_PCT: '0.10'
+          FINNHUB_KEY:      ${{ secrets.FINNHUB_KEY }}
+          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
+        run: python -m src.agent
+
+      - name: Logs als Artefakt speichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: haifin-logs-${{ github.run_id }}
+          path: logs/
+          retention-days: 30
