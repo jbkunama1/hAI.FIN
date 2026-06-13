@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>hAI.FIN – Autonomer ETF-Trading-Agent</title>
-  <meta name="description" content="Self-hosted, regelbasierter ETF-Trading-Agent mit Composite Signal Score, Telegram-Alerts und Streamlit-Dashboard.">
+  <meta name="description" content="Self-hosted, konservativer ETF-Trading-Agent für eToro. Docker/Portainer-ready, Telegram-Alerts, Streamlit-Dashboard.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300..700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
       --radius-lg:  12px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
     body {
       font-family: var(--font-body);
       background: var(--bg);
@@ -52,11 +52,12 @@
     }
     .nav-logo {
       font-family: var(--font-mono);
-      font-weight: 600; font-size: 1.1rem;
+      font-weight: 600; font-size: 1.05rem;
       color: var(--teal);
       display: flex; align-items: center; gap: 8px;
+      text-decoration: none;
     }
-    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
     .nav-links a { color: var(--text-muted); font-size: .875rem; }
     .nav-links a:hover { color: var(--text); text-decoration: none; }
     .nav-cta {
@@ -65,34 +66,33 @@
       font-size: .8rem; transition: opacity .15s;
     }
     .nav-cta:hover { opacity: .85; text-decoration: none !important; }
+    .nav-version {
+      background: var(--green-dim); color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 999px; padding: 2px 10px;
+      font-family: var(--font-mono); font-size: .75rem; font-weight: 600;
+    }
 
     /* HERO */
     .hero {
       max-width: 860px; margin: 0 auto;
       padding: 6rem 2rem 4rem;
       text-align: center;
-    }
-    .hero-badge {
-      display: inline-block;
-      background: var(--green-dim);
-      color: var(--green);
-      border: 1px solid var(--green);
-      border-radius: 999px;
-      padding: 4px 14px; font-size: .8rem;
-      font-family: var(--font-mono);
-      margin-bottom: 1.5rem;
+      background: radial-gradient(ellipse 70% 40% at 50% -10%, rgba(63,185,80,.12) 0%, transparent 70%);
     }
     .hero h1 {
       font-size: clamp(2.2rem, 5vw, 3.5rem);
       font-weight: 700; line-height: 1.1;
       margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #e6edf3 40%, var(--teal) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .hero h1 span { color: var(--teal); }
     .hero p {
-      font-size: 1.15rem; color: var(--text-muted);
-      max-width: 600px; margin: 0 auto 2rem;
+      font-size: 1.125rem; color: var(--text-muted);
+      max-width: 580px; margin: 0 auto 2rem;
     }
-    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem; }
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 10px 22px; border-radius: var(--radius);
@@ -102,54 +102,46 @@
     }
     .btn:hover { opacity: .85; transform: translateY(-1px); text-decoration: none; }
     .btn-primary { background: var(--green); color: #0d1117; }
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    /* BADGES */
-    .badges { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; margin: 2.5rem 0 0; }
-    .badges img { display: inline; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .badges { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
+    .badges img { display: inline; height: 20px; }
 
     /* SECTIONS */
     section { max-width: 960px; margin: 0 auto; padding: 4rem 2rem; }
     section + section { border-top: 1px solid var(--border); }
-    h2 {
-      font-size: 1.6rem; font-weight: 700;
-      margin-bottom: 1.5rem;
-      display: flex; align-items: center; gap: .5rem;
+    .section-label {
+      font-size: .75rem; font-family: var(--font-mono);
+      color: var(--green); text-transform: uppercase;
+      letter-spacing: .1em; margin-bottom: .75rem;
     }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 1.5rem; }
 
-    /* FEATURE GRID */
+    /* FEATURES */
     .features {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 1rem;
     }
     .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem 1.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+      transition: border-color .18s;
     }
+    .feature-card:hover { border-color: var(--green); }
     .feature-card .icon { font-size: 1.5rem; margin-bottom: .5rem; }
     .feature-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: .35rem; }
     .feature-card p { font-size: .875rem; color: var(--text-muted); }
 
     /* SCORE TABLE */
     .score-table {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
     }
     .score-table table { width: 100%; border-collapse: collapse; }
     .score-table th {
-      background: var(--surface-2);
-      text-align: left; padding: .75rem 1rem;
-      font-size: .8rem; text-transform: uppercase;
-      letter-spacing: .05em; color: var(--text-muted);
+      background: var(--surface-2); text-align: left;
+      padding: .75rem 1rem; font-size: .75rem;
+      text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted);
     }
     .score-table td { padding: .7rem 1rem; font-size: .9rem; }
     .score-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
@@ -161,49 +153,40 @@
     .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem; }
     .pill {
       display: flex; align-items: center; gap: .4rem;
-      padding: .5rem 1rem; border-radius: 999px;
+      padding: .5rem 1.1rem; border-radius: 999px;
       font-family: var(--font-mono); font-size: .85rem; font-weight: 600;
     }
     .pill-buy    { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
     .pill-hold   { background: #2a2000; color: var(--yellow); border: 1px solid var(--yellow); }
-    .pill-skip   { background: #2a0f0f; color: var(--red); border: 1px solid var(--red); }
+    .pill-skip   { background: #1e2028; color: var(--text-muted); border: 1px solid var(--border); }
     .pill-reduce { background: #2a0f0f; color: var(--red); border: 1px solid var(--red); }
 
-    /* CODE BLOCK */
+    /* CODE */
     pre {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem 1.5rem;
-      overflow-x: auto;
-      font-family: var(--font-mono);
-      font-size: .85rem;
-      line-height: 1.7;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+      overflow-x: auto; font-family: var(--font-mono);
+      font-size: .85rem; line-height: 1.75;
     }
-    code { font-family: var(--font-mono); font-size: .875em; color: var(--teal); }
-    pre code { color: var(--text); }
     .comment { color: var(--text-muted); }
     .kw  { color: #ff7b72; }
     .str { color: #a5d6ff; }
-    .num { color: var(--green); }
 
-    /* DATA SOURCES */
+    /* SOURCES */
     .sources {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: .75rem;
     }
     .source-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem;
       display: flex; flex-direction: column; gap: .3rem;
     }
     .source-card .name { font-weight: 600; font-size: .95rem; }
     .source-card .desc { font-size: .8rem; color: var(--text-muted); }
-    .badge-free  { display: inline-block; background: var(--green-dim); color: var(--green); border-radius: 4px; padding: 1px 7px; font-size: .75rem; }
-    .badge-key   { display: inline-block; background: #1a1a2e; color: var(--blue);  border-radius: 4px; padding: 1px 7px; font-size: .75rem; }
+    .badge-free { display: inline-block; background: var(--green-dim); color: var(--green); border-radius: 4px; padding: 1px 7px; font-size: .75rem; font-weight: 600; }
+    .badge-key  { display: inline-block; background: #1a1a2e; color: var(--blue);  border-radius: 4px; padding: 1px 7px; font-size: .75rem; font-weight: 600; }
 
     /* STACK */
     .stack-grid {
@@ -212,33 +195,24 @@
       gap: .75rem;
     }
     .stack-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: .75rem 1rem;
-      font-size: .875rem;
-      display: flex; align-items: center; gap: .6rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: .75rem 1rem;
+      font-size: .875rem; display: flex; align-items: center; gap: .6rem;
     }
 
     /* DISCLAIMER */
     .disclaimer {
-      background: #1a0a00;
-      border: 1px solid var(--yellow);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem 1.5rem;
-      font-size: .875rem;
-      color: #d4b87a;
-      line-height: 1.7;
+      background: #1a0a00; border: 1px solid var(--yellow);
+      border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+      font-size: .875rem; color: #d4b87a; line-height: 1.7;
     }
     .disclaimer strong { color: var(--yellow); }
 
     /* FOOTER */
     footer {
       border-top: 1px solid var(--border);
-      text-align: center;
-      padding: 2.5rem 1rem;
-      color: var(--text-muted);
-      font-size: .875rem;
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--text-muted); font-size: .875rem;
     }
     footer a { color: var(--text-muted); }
     footer a:hover { color: var(--text); }
@@ -254,64 +228,72 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-      <polyline points="16 7 22 7 22 13"/>
+  <a href="#" class="nav-logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
     </svg>
     hAI.FIN
-  </div>
-  <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#signale">Signale</a>
-    <a href="#quickstart">Quickstart</a>
-    <a href="#daten">Datenquellen</a>
-    <a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener" class="nav-cta">★ GitHub</a>
-  </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#signale">Signale</a></li>
+    <li><a href="#quickstart">Quickstart</a></li>
+    <li><a href="#daten">Datenquellen</a></li>
+    <li><a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener noreferrer" class="nav-cta">★ GitHub</a></li>
+  </ul>
+  <span class="nav-version">v0.1.0</span>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-badge">⚡ v0.1.0 – Alpha</div>
-  <h1>Autonomer<br><span>ETF-Trading-Agent</span></h1>
-  <p>Self-hosted · regelbasiert · konservativ · Telegram-Alerts · Streamlit-Dashboard · Docker-ready</p>
+  <h1>Autonomer<br>ETF-Trading-Agent</h1>
+  <p>Self-hosted &middot; regelbasiert &middot; konservativ &middot; Telegram-Alerts &middot; Streamlit-Dashboard &middot; Docker-ready</p>
   <div class="hero-buttons">
-    <a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener" class="btn btn-primary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-      GitHub
+    <a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub Repo
     </a>
-    <a href="https://github.com/jbkunama1/hAI.FIN/blob/main/README.md" target="_blank" rel="noopener" class="btn btn-secondary">
-      📖 Dokumentation
+    <a href="https://github.com/jbkunama1/hAI.FIN/releases" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+      &#x1F3F7;&#xFE0F; Releases
+    </a>
+    <a href="https://github.com/jbkunama1/hAI.FIN/blob/main/README.md" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+      &#x1F4D6; Dokumentation
     </a>
   </div>
   <div class="badges">
-    <img src="https://img.shields.io/badge/Version-0.1.0-blue.svg" alt="Version">
-    <img src="https://img.shields.io/badge/Python-3.12-blue.svg" alt="Python">
-    <img src="https://img.shields.io/badge/Docker-Ready-blue.svg" alt="Docker">
-    <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT">
-    <img src="https://img.shields.io/badge/Default-DRY__RUN-orange.svg" alt="DRY RUN">
+    <img src="https://img.shields.io/badge/Version-0.1.0-blue.svg" alt="Version 0.1.0" width="100" height="20" loading="lazy">
+    <img src="https://img.shields.io/badge/Python-3.12-blue.svg" alt="Python 3.12" width="90" height="20" loading="lazy">
+    <img src="https://img.shields.io/badge/Docker-Ready-blue.svg" alt="Docker Ready" width="96" height="20" loading="lazy">
+    <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT" width="88" height="20" loading="lazy">
+    <img src="https://img.shields.io/badge/Status-Alpha-yellow.svg" alt="Status Alpha" width="82" height="20" loading="lazy">
+    <img src="https://img.shields.io/badge/Default-DRY__RUN-orange.svg" alt="DRY RUN" width="104" height="20" loading="lazy">
+    <img src="https://img.shields.io/github/last-commit/jbkunama1/hAI.FIN" alt="last commit" height="20" loading="lazy">
   </div>
 </div>
 
 <!-- FEATURES -->
 <section id="features">
-  <h2>✨ Features</h2>
+  <p class="section-label">Was kann er?</p>
+  <h2>Features</h2>
   <div class="features">
-    <div class="feature-card"><div class="icon">🧠</div><h3>Composite Signal Score</h3><p>MA200, MA50, RSI, Fear&Greed, VIX, Zinskurve und Event-Kalender in einem Score.</p></div>
-    <div class="feature-card"><div class="icon">📊</div><h3>Live-Marktdaten</h3><p>CNN Fear&Greed, yfinance, FRED – größtenteils ohne API-Key sofort nutzbar.</p></div>
+    <div class="feature-card"><div class="icon">🧠</div><h3>Composite Signal Score</h3><p>MA200, MA50, RSI, Fear&amp;Greed, VIX, Zinskurve und Event-Kalender zu einem Score verdichtet.</p></div>
+    <div class="feature-card"><div class="icon">📊</div><h3>Live-Marktdaten</h3><p>CNN Fear&amp;Greed, yfinance, FRED – größtenteils ohne API-Key sofort nutzbar.</p></div>
     <div class="feature-card"><div class="icon">🛡️</div><h3>Harte Guardrails</h3><p>Max. Trades/Tag, Positionslimit, Cash-Reserve, Asset-Whitelist – keine Ausnahmen.</p></div>
     <div class="feature-card"><div class="icon">📱</div><h3>Telegram-Notifier</h3><p>Morgen-Briefing, Trade-Alerts, VIX-Notbremse und Fehlermeldungen in Echtzeit.</p></div>
     <div class="feature-card"><div class="icon">📈</div><h3>Streamlit-Dashboard</h3><p>Live-Signale, Portfolio-Simulation und Trade-Log auf Port 8501.</p></div>
     <div class="feature-card"><div class="icon">⏰</div><h3>GitHub Actions Cron</h3><p>Automatischer Lauf Mo–Fr 09:45 ET mit Log-Archivierung als Artefakte.</p></div>
+    <div class="feature-card"><div class="icon">🐳</div><h3>Docker-Ready</h3><p>Agent und Dashboard als getrennte Services. Portainer-Stack in Minuten deployed.</p></div>
+    <div class="feature-card"><div class="icon">🧪</div><h3>Unit-Tests</h3><p>8 pytest-Tests für Signal-Logik. DRY_RUN=true ist sicherer Standard.</p></div>
   </div>
 </section>
 
 <!-- SIGNALE -->
 <section id="signale">
-  <h2>🎯 Composite Signal Score</h2>
+  <p class="section-label">Entscheidungslogik</p>
+  <h2>Composite Signal Score</h2>
   <div class="score-table">
     <table>
-      <thead><tr><th>Punkte</th><th>Indikator</th><th>Bedingung</th></tr></thead>
+      <thead><tr><th>Score</th><th>Indikator</th><th>Bedingung</th></tr></thead>
       <tbody>
         <tr><td class="pos">+2</td><td>MA200-Trend</td><td>Kurs &gt; MA200 (langfristiger Aufwärtstrend)</td></tr>
         <tr><td class="pos">+1</td><td>Golden Cross</td><td>MA50 &gt; MA200</td></tr>
@@ -335,10 +317,12 @@
 
 <!-- QUICKSTART -->
 <section id="quickstart">
-  <h2>🚀 Quickstart</h2>
-  <pre><span class="comment"># 1. Klonen & konfigurieren</span>
+  <p class="section-label">Loslegen</p>
+  <h2>Quickstart</h2>
+  <pre><span class="comment"># 1. Klonen &amp; konfigurieren</span>
 git clone https://github.com/jbkunama1/hAI.FIN.git
-<span class="kw">cd</span> hAI.FIN && cp .env.example .env
+<span class="kw">cd</span> hAI.FIN &amp;&amp; cp .env.example .env
+joe .env   <span class="comment"># Secrets eintragen</span>
 
 <span class="comment"># 2. Lokal testen</span>
 pip install -r requirements.txt
@@ -356,7 +340,8 @@ docker compose up -d
 
 <!-- DATENQUELLEN -->
 <section id="daten">
-  <h2>📡 Freie Datenquellen</h2>
+  <p class="section-label">Freie Quellen</p>
+  <h2>Datenquellen</h2>
   <div class="sources">
     <div class="source-card"><div class="name">CNN Fear &amp; Greed</div><div class="desc">Sentiment 0–100 aus 7 Teilindikatoren</div><span class="badge-free">kein Key</span></div>
     <div class="source-card"><div class="name">yfinance</div><div class="desc">Kurse, MA200/50, RSI(14), Volumen</div><span class="badge-free">kein Key</span></div>
@@ -368,30 +353,38 @@ docker compose up -d
 
 <!-- STACK -->
 <section>
-  <h2>🛠️ Tech-Stack</h2>
+  <p class="section-label">Technologie</p>
+  <h2>Tech-Stack</h2>
   <div class="stack-grid">
     <div class="stack-item">🐳 Docker / Portainer</div>
     <div class="stack-item">🐍 Python 3.12</div>
     <div class="stack-item">📈 Streamlit</div>
-    <div class="stack-item">🧹 pytest</div>
-    <div class="stack-item">📡 yfinance</div>
-    <div class="stack-item">🏦 FRED API</div>
+    <div class="stack-item">🧪 pytest</div>
+    <div class="stack-item">📡 yfinance / FRED</div>
     <div class="stack-item">📱 Telegram</div>
     <div class="stack-item">⏰ GitHub Actions</div>
+    <div class="stack-item">🔒 DRY_RUN Default</div>
   </div>
 </section>
 
 <!-- DISCLAIMER -->
 <section>
   <div class="disclaimer">
-    <strong>⚠️ Disclaimer:</strong> Trading birgt erhebliche Risiken. Du kannst dein eingesetztes Kapital vollständig verlieren. Dieses Projekt ist ein experimentelles Open-Source-Tool für Bildungs- und Forschungszwecke. Der Autor übernimmt keinerlei Haftung für Verluste oder Schäden. <strong>Never trade more than you can afford to lose.</strong>
+    <strong>⚠️ Disclaimer:</strong> Trading birgt erhebliche Risiken. Du kannst dein eingesetztes Kapital vollständig verlieren.
+    Dieses Projekt ist ein experimentelles Open-Source-Tool für Bildungs- und Forschungszwecke.
+    Der Autor übernimmt keinerlei Haftung für Verluste oder Schäden jeglicher Art.<br><br>
+    <strong>Never trade more than you can afford to lose.</strong>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <p>🤖 <strong>hAI.FIN</strong> v0.1.0 &nbsp;·&nbsp; <a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener">GitHub</a> &nbsp;·&nbsp; <a href="https://github.com/jbkunama1/hAI.FIN/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a></p>
-  <p style="margin-top:.5rem; font-size:.8rem;">Built with passion for self-hosted AI &amp; finance automation</p>
+  <p>🤖 <strong>hAI.FIN</strong> v0.1.0 &nbsp;&middot;&nbsp;
+    <a href="https://github.com/jbkunama1/hAI.FIN" target="_blank" rel="noopener noreferrer">GitHub</a> &nbsp;&middot;&nbsp;
+    <a href="https://github.com/jbkunama1/hAI.FIN/releases" target="_blank" rel="noopener noreferrer">Releases</a> &nbsp;&middot;&nbsp;
+    <a href="https://github.com/jbkunama1/hAI.FIN/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+  </p>
+  <p style="margin-top:.5rem; font-size:.8rem; color:#484f58;">Built with passion for self-hosted AI &amp; finance automation — by <a href="https://github.com/jbkunama1" target="_blank" rel="noopener noreferrer">therealteacher</a></p>
 </footer>
 
 </body>
