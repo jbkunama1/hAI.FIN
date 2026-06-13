@@ -1,23 +1,41 @@
 {
   "name": "hAI.FIN Conservative Policy",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "description": "Konservative ETF-Trendfolge-Strategie mit harten Guardrails",
   "rules": {
     "max_trades_per_day": 3,
     "max_position_percent": 10,
+    "min_cash_reserve_percent": 20,
+    "rebalance_threshold_percent": 10,
     "allowed_assets": ["QQQ", "SPY", "VTI", "VWCE", "VUSA"],
     "enable_short": false,
     "enable_leverage": false,
-    "min_cash_reserve_percent": 20,
-    "rebalance_threshold_percent": 10
+    "no_trade_events": ["FOMC", "CPI", "NFP"]
   },
-  "trading_hours": {
-    "timezone": "America/New_York",
-    "market_open": "09:30",
-    "market_close": "16:00"
+  "target_allocation": {
+    "SPY": 40,
+    "QQQ": 30,
+    "VTI": 20,
+    "CASH": 10
   },
   "risk_management": {
     "stop_loss_percent": 5,
     "take_profit_percent": 10,
-    "max_drawdown_percent": 15
+    "max_drawdown_percent": 15,
+    "trailing_stop": false
+  },
+  "technical_signals": {
+    "use_ma200": true,
+    "use_ma50": true,
+    "rsi_buy_max": 60,
+    "rsi_buy_min": 35,
+    "rsi_sell_min": 70
+  },
+  "trading_hours": {
+    "timezone": "America/New_York",
+    "market_open": "09:30",
+    "market_close": "16:00",
+    "skip_first_minutes": 15,
+    "skip_last_minutes": 15
   }
 }
