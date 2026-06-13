@@ -6,6 +6,9 @@
 ![Python](https://img.shields.io/badge/Python-3.12-blue.svg)
 ![Status](https://img.shields.io/badge/Status-Alpha-yellow.svg)
 ![DRY RUN](https://img.shields.io/badge/Default-DRY__RUN-orange.svg)
+[![GitHub Pages](https://img.shields.io/badge/Docs-GitHub%20Pages-brightgreen.svg)](https://jbkunama1.github.io/hAI.FIN)
+[![GitHub last commit](https://img.shields.io/github/last-commit/jbkunama1/hAI.FIN)](https://github.com/jbkunama1/hAI.FIN/commits/main)
+[![GitHub issues](https://img.shields.io/github/issues/jbkunama1/hAI.FIN)](https://github.com/jbkunama1/hAI.FIN/issues)
 
 > **Autonomer, konservativer ETF-Trading-Agent für eToro Agent Portfolios.**  
 > Self-hosted · Docker/Portainer · Regelbasiert · Telegram-Alerts · Streamlit-Dashboard
@@ -102,6 +105,8 @@ hAI.FIN/
 │   └── agent-knowledge.md       # ETF-Profile, Marktphasen
 ├── 📁 tests/
 │   └── test_signals.py          # 8 Unit-Tests
+├── 📁 docs/
+│   └── index.html               # GitHub Pages Landing Page
 └── 📁 .github/workflows/
     └── daily-run.yml            # Mo–Fr 09:45 ET Cron
 ```
@@ -188,6 +193,20 @@ TELEGRAM_CHAT_ID=12345678
 - ✅ VIX ≥ 40 → automatischer Cash-Modus
 - ✅ Keine Orders außerhalb 09:30–16:00 ET
 - ✅ `DRY_RUN=true` als sicherer Standard
+
+---
+
+## 📋 Changelog
+
+### v0.1.0 – 2026-06-13
+- 🎉 Initiales Release
+- Composite Signal Score (8 Indikatoren)
+- Streamlit-Dashboard
+- Docker/Portainer-Setup
+- Telegram-Notifier
+- GitHub Actions Cron
+- 8 Unit-Tests
+- GitHub Pages Landing Page
 
 ---
 
